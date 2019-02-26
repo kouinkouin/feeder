@@ -60,15 +60,17 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         </image>
         <?php
         foreach ($products AS $product) {
-            $image = Image::getImages((int)($cookie->id_lang), $product['id_product']);
             echo "\t\t<item>\n";
             echo "\t\t\t<title><![CDATA[" . $product['name'] . " - " . html_entity_decode(Tools::displayPrice(Product::getPriceStatic($product['id_product']), $currency), ENT_COMPAT, 'UTF-8') . " ]]></title>\n";
             echo "\t\t\t<description>";
             $cdata = true;
-            if (is_array($image) AND sizeof($image)) {
-                $imageObj = new Image($image[0]['id_image']);
-                echo "<![CDATA[<img src='" . $link->getImageLink($product['link_rewrite'], $image[0]['id_image'], 'small_default') . "' title='" . str_replace('&', '', $product['name']) . "' alt='thumb' />";
-                $cdata = false;
+            if (Configuration::get('FEEDER_INCLUDE_IMAGES')) {
+                $image = Image::getImages((int)($cookie->id_lang), $product['id_product']);
+                if (is_array($image) AND sizeof($image)) {
+                    $imageObj = new Image($image[0]['id_image']);
+                    echo "<![CDATA[<img src='" . $link->getImageLink($product['link_rewrite'], $image[0]['id_image'], 'small_default') . "' title='" . str_replace('&', '', $product['name']) . "' alt='thumb' />";
+                    $cdata = false;
+                }
             }
             if ($cdata) {
                 echo "<![CDATA[";

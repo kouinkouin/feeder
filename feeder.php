@@ -39,6 +39,7 @@ class Feeder extends Module
         $this->version = '0.7.3';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
+        $this->bootstrap = true;
 
         $this->_directory = dirname(__FILE__) . '/../../';
         parent::__construct();
@@ -49,7 +50,7 @@ class Feeder extends Module
 
     function install()
     {
-        return (parent::install() && $this->registerHook('header'));
+        return (parent::install() && $this->registerHook('header') && $this->initDefaultConfigurationValues());
     }
 
     function hookHeader($params)
@@ -73,5 +74,86 @@ class Feeder extends Module
             'feedUrl' => Tools::getShopDomainSsl(true, true) . _MODULE_DIR_ . $this->name . '/rss.php?id_category=' . $id_category . '&amp;orderby=' . $orderBy . '&amp;orderway=' . $orderWay,
         ]);
         return $this->display(__FILE__, 'feederHeader.tpl');
+    }
+
+    private function initDefaultConfigurationValues()
+    {
+        if (!Configuration::hasKey('FEEDER_INCLUDE_IMAGES')) {
+            Configuration::updateValue('FEEDER_INCLUDE_IMAGES', 1);
+        }
+
+        return true;
+    }
+
+    public function getContent()
+    {
+        $output = null;
+
+        if (Tools::isSubmit('submit' . $this->name)) {
+            $value = strval(Tools::getValue('FEEDER_INCLUDE_IMAGES'));
+            Configuration::updateValue('FEEDER_INCLUDE_IMAGES', $value);
+            $output .= $this->displayConfirmation($this->l('Settings updated'));
+        }
+        return $output . $this->displayForm();
+    }
+
+    public function displayForm()
+    {
+        // Get default language
+        $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
+
+        // Init Fields form array
+        $fields_form[0]['form'] = [
+            'legend' => [
+                'title' => $this->l('Settings'),
+                'icon' => 'icon-cogs',
+            ],
+            'input' => [
+                [
+                    'type' => 'switch',
+                    'label' => $this->l('Include images'),
+                    'name' => 'FEEDER_INCLUDE_IMAGES',
+                    'desc' => $this->l('Include images in RSS feeds'),
+                    'values' => [
+                        [
+                            'id' => 'active_on',
+                            'value' => 1,
+                            'label' => $this->l('Enabled'),
+                        ],
+                        [
+                            'id' => 'active_off',
+                            'value' => 0,
+                            'label' => $this->l('Disabled'),
+                        ],
+                    ],
+                ],
+            ],
+            'submit' => [
+                'title' => $this->l('Save'),
+                'class' => 'btn btn-default pull-right',
+            ],
+        ];
+
+        $helper = new HelperForm();
+
+        // Module, token and currentIndex
+        $helper->module = $this;
+        $helper->name_controller = $this->name;
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+        $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
+
+        // Language
+        $helper->default_form_language = $default_lang;
+        $helper->allow_employee_form_lang = $default_lang;
+
+        // Title and toolbar
+        $helper->title = $this->displayName;
+        $helper->show_toolbar = false;        // false -> remove toolbar
+        $helper->submit_action = 'submit' . $this->name;
+
+        // Load current value
+        $helper->fields_value['FEEDER_INCLUDE_IMAGES'] = Configuration::get('FEEDER_INCLUDE_IMAGES');
+
+        return $helper->generateForm($fields_form);
     }
 }
