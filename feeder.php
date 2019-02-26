@@ -103,34 +103,38 @@ class Feeder extends Module
         $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
 
         // Init Fields form array
-        $fields_form[0]['form'] = [
-            'legend' => [
-                'title' => $this->l('Settings'),
-                'icon' => 'icon-cogs',
-            ],
-            'input' => [
-                [
-                    'type' => 'switch',
-                    'label' => $this->l('Include images'),
-                    'name' => 'FEEDER_INCLUDE_IMAGES',
-                    'desc' => $this->l('Include images in RSS feeds'),
-                    'values' => [
+        $fields_form = [
+            0 => [
+                'form' => [
+                    'legend' => [
+                        'title' => $this->l('Settings'),
+                        'icon' => 'icon-cogs',
+                    ],
+                    'input' => [
                         [
-                            'id' => 'active_on',
-                            'value' => 1,
-                            'label' => $this->l('Enabled'),
-                        ],
-                        [
-                            'id' => 'active_off',
-                            'value' => 0,
-                            'label' => $this->l('Disabled'),
+                            'type' => 'switch',
+                            'label' => $this->l('Include images'),
+                            'name' => 'FEEDER_INCLUDE_IMAGES',
+                            'desc' => $this->l('Include images in RSS feeds'),
+                            'values' => [
+                                [
+                                    'id' => 'active_on',
+                                    'value' => 1,
+                                    'label' => $this->l('Enabled'),
+                                ],
+                                [
+                                    'id' => 'active_off',
+                                    'value' => 0,
+                                    'label' => $this->l('Disabled'),
+                                ],
+                            ],
                         ],
                     ],
+                    'submit' => [
+                        'title' => $this->l('Save'),
+                        'class' => 'btn btn-default pull-right',
+                    ],
                 ],
-            ],
-            'submit' => [
-                'title' => $this->l('Save'),
-                'class' => 'btn btn-default pull-right',
             ],
         ];
 
